@@ -1,0 +1,14 @@
+{
+    "environment_guid": "12e8f397-c1b0-4f23-84b2-aa9af78d1c35",
+    "is_gov": true,
+    "app_mappings": [
+        {
+            "AppName": "SalesApp",
+            "AppGUID": "7d4c2f89-6e5a-4b17-9d3e-f8c6b2a1d590"
+        },
+        {
+            "AppName": "InventoryManager",
+            "AppGUID": "3a9d5b82-4f7c-48e1-95d0-c2e7d4f63b81"
+        }
+    ]
+}
