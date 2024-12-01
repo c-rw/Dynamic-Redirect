@@ -1,4 +1,4 @@
-# DynamicRedirector
+# Dynamic Redirect
 
 A lightweight Azure Function that intelligently routes users to Power Apps applications using dynamic URL redirection. Perfect for organizations managing multiple Power Apps environments that need a simplified access solution.
 
