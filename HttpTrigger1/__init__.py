@@ -1,16 +1,3 @@
-"""
-DynamicRedirect Azure Function
-
-Author: Chris Worth
-Website: https://chrisworth.dev/
-License: Apache 2.0 (See LICENSE file for details)
-
-Description:
-This Azure Function provides a dynamic redirection service for Power Apps.
-Configuration is managed through AppMappings.json including environment
-settings and app mappings.
-"""
-
 import json
 import logging
 import os
