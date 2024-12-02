@@ -5,7 +5,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 ## Key Features
 
 - **Smart URL Routing**: Automatically directs users to the correct Power Apps application based on the `app_name` parameter
-- **Configuration via JSON**: Simple application mapping management through a centralized `AppMappings.json` file
+- **Environment-based Configuration**: Uses environment variables for secure configuration management
 - **Environment Flexibility**: Supports both commercial and government (.gov) Power Apps environments
 - **Robust Error Handling**: Provides clear, actionable feedback for common request scenarios
 
@@ -13,30 +13,38 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/c-rw/DynamicRedirector.git
-   cd DynamicRedirector
+   git clone https://github.com/c-rw/Dynamic-Redirect.git
+   cd Dynamic-Redirect
    ```
 
 2. **Configure Your Environment**
-   Create an `AppMappings.json` file in the root directory:
+   Create a `local.settings.json` file in the root directory:
    ```json
    {
-     "environment_guid": "your-environment-guid",
-     "is_gov": false,
-     "app_mappings": [
-       {
-         "AppName": "YourAppName",
-         "AppGUID": "your-app-guid"
-       }
-     ]
+     "IsEncrypted": false,
+     "Values": {
+       "AzureWebJobsStorage": "",
+       "FUNCTIONS_WORKER_RUNTIME": "python",
+       "ENVIRONMENT_GUID": "your-environment-guid",
+       "IS_GOV": "true",
+       "APP_MAPPINGS": "[{\"AppName\": \"YourAppName\", \"AppGUID\": \"your-app-guid\"}]"
+     }
    }
    ```
 
-3. **Test Locally**
+   > ⚠️ Important: Add local.settings.json to your .gitignore file to prevent committing sensitive information.
+
+3. **Configure Azure Function App Settings**
+   When deploying to Azure, configure the following application settings:
+   - `ENVIRONMENT_GUID`: Your Power Apps environment identifier
+   - `IS_GOV`: Set to "true" for .gov environments, "false" otherwise
+   - `APP_MAPPINGS`: JSON string containing app name to GUID mappings
+
+4. **Test Locally**
    - Install [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
    - Run `func start` to start the local development server
 
-4. **Deploy to Azure**
+5. **Deploy to Azure**
    Follow the [official deployment guide](https://learn.microsoft.com/azure/azure-functions/functions-deployment-technologies)
 
 ## Usage
@@ -48,6 +56,26 @@ Send a GET request to the function endpoint:
 GET /api/redirector?app_name=YourAppName
 ```
 
+Additional query parameters can be passed and will be forwarded to the Power App:
+```http
+GET /api/redirector?app_name=YourAppName&param1=value1&param2=value2
+```
+
+All query parameters (except `app_name`) will be preserved and passed through to the target Power App URL.
+
+### Example Requests
+
+1. Basic redirect:
+   ```http
+   GET /api/redirector?app_name=SalesApp
+   ```
+
+2. Redirect with additional parameters:
+   ```http
+   GET /api/redirector?app_name=SalesApp&user_id=12345&view=summary
+   ```
+   This will redirect to the SalesApp while preserving `user_id` and `view` parameters.
+
 ### Response Types
 
 | Status Code | Description | Example Scenario |
@@ -55,30 +83,26 @@ GET /api/redirector?app_name=YourAppName
 | 302 | Successful redirect to Power Apps | Valid app_name provided |
 | 400 | Missing app_name parameter | No app_name in query string |
 | 404 | Application not found | Invalid app_name provided |
-| 500 | Server configuration error | JSON mapping file issues |
+| 500 | Server configuration error | Missing environment variables |
 
 ## Configuration Details
 
-The `AppMappings.json` file requires three key components:
+The function requires three environment variables:
 
-- `environment_guid`: Your Power Apps environment identifier
-- `is_gov`: Boolean flag for .gov domain usage
-- `app_mappings`: Array of application mappings containing:
-  - `AppName`: The friendly name used in requests
-  - `AppGUID`: The Power Apps application GUID
+1. `ENVIRONMENT_GUID`: Your Power Apps environment identifier
+2. `IS_GOV`: Boolean flag for .gov domain usage ("true" or "false")
+3. `APP_MAPPINGS`: JSON string array of application mappings containing:
+   - `AppName`: The friendly name used in requests
+   - `AppGUID`: The Power Apps application GUID
 
-Example:
+Example APP_MAPPINGS:
 ```json
-{
-    "environment_guid": "12345678-1234-1234-1234-123456789012",
-    "is_gov": false,
-    "app_mappings": [
-        {
-            "AppName": "SalesApp",
-            "AppGUID": "87654321-4321-4321-4321-210987654321"
-        }
-    ]
-}
+[
+    {
+        "AppName": "SalesApp",
+        "AppGUID": "87654321-4321-4321-4321-210987654321"
+    }
+]
 ```
 
 ## Development
@@ -97,15 +121,24 @@ Example:
    python -m pip install -r requirements.txt
    ```
 
-2. Start the function locally:
+2. Set up local.settings.json with your configuration
+
+3. Start the function locally:
    ```bash
    func start
    ```
 
-3. Test using curl or Postman:
+4. Test using curl or Postman:
    ```bash
    curl "http://localhost:7071/api/redirector?app_name=YourAppName"
    ```
+
+### Environment Variable Management
+
+For production deployments, consider using:
+- Azure Key Vault for sensitive configuration
+- Azure App Configuration for feature flags and app settings
+- Managed Identities for secure access to Azure resources
 
 ## Contributing
 
@@ -119,7 +152,7 @@ Example:
 
 For support, please:
 
-1. Check existing [issues](https://github.com/c-rw/DynamicRedirector/issues)
+1. Check existing [issues](https://github.com/c-rw/Dynamic-Redirect/issues)
 2. Create a new issue with detailed reproduction steps
 3. Include relevant logs and configuration (sanitized of sensitive data)
 
