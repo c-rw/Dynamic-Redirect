@@ -119,8 +119,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
 
-        # Get optional deep link parameters
-        deep_link = req.params.get("deep_link")
+        # Extract all query parameters, except the mandatory 'app_name'
+        params = req.params.copy()
+        params.pop("app_name", None)
+
+        # Build the query string from remaining parameters
+        query_string = "&".join([f"{key}={value}" for key, value in params.items()])
 
         # Construct base URL using environment configuration
         base_url = f"https://apps.{'gov.' if is_gov else ''}powerapps{'.us' if is_gov else '.com'}/play/e"
@@ -139,10 +143,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         app_guid = mapping.get("AppGUID")
         redirect_url = f"{base_url}/{environment_guid}/a/{app_guid}"
         
-        # Append deep link parameters if present
-        if deep_link:
-            redirect_url = f"{redirect_url}?{deep_link}"
-            logger.info(f"Adding deep link parameters: {deep_link}", 
+        # Append query string if present
+        if query_string:
+            redirect_url = f"{redirect_url}?{query_string}"
+            logger.info(f"Adding query parameters: {query_string}", 
                        extra={"request_id": request_id})
 
         logger.info(f"Redirecting to: {redirect_url}", 
