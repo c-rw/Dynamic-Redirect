@@ -10,20 +10,13 @@ import azure.functions as func
 # Configure logging
 logger = logging.getLogger(__name__)
 
-
-class MappingError(Exception):
-    """Custom exception for mapping-related errors."""
-    pass
-
-
 class ConfigError(Exception):
     """Custom exception for configuration-related errors."""
     pass
 
-
 @lru_cache(maxsize=1)
 def load_config() -> Tuple[str, bool, List[Dict[str, str]]]:
-    """Load and cache configuration and mappings from JSON file.
+    """Load and cache configuration from environment variables.
     
     Returns:
         Tuple[str, bool, List[Dict[str, str]]]: Tuple containing:
@@ -33,41 +26,31 @@ def load_config() -> Tuple[str, bool, List[Dict[str, str]]]:
         
     Raises:
         ConfigError: If required configuration is missing
-        MappingError: If there's an error loading or parsing the mappings file
     """
     try:
-        mappings_file = os.path.join(os.path.dirname(__file__), "AppMappings.json")
-        if not os.path.exists(mappings_file):
-            logger.error("AppMappings.json not found")
-            raise ConfigError("Configuration file not found")
+        # Get environment variables
+        environment_guid = os.environ.get('ENVIRONMENT_GUID')
+        is_gov = os.environ.get('IS_GOV', 'false').lower() == 'true'
+        app_mappings_str = os.environ.get('APP_MAPPINGS')
 
-        with open(mappings_file, "r") as f:
-            config = json.load(f)
+        if not environment_guid:
+            raise ConfigError("ENVIRONMENT_GUID environment variable not found")
+        if not app_mappings_str:
+            raise ConfigError("APP_MAPPINGS environment variable not found")
 
-        # Validate required configuration
-        if "environment_guid" not in config:
-            raise ConfigError("environment_guid not found in configuration")
-        if "is_gov" not in config:
-            raise ConfigError("is_gov not found in configuration")
-        if "app_mappings" not in config:
-            raise ConfigError("app_mappings not found in configuration")
-
-        environment_guid = config["environment_guid"]
-        is_gov = config["is_gov"]
-        mappings = config["app_mappings"]
+        try:
+            mappings = json.loads(app_mappings_str)
+        except json.JSONDecodeError as e:
+            raise ConfigError(f"Failed to parse APP_MAPPINGS JSON: {str(e)}")
 
         logger.info(
             f"Successfully loaded configuration with {len(mappings)} mappings"
         )
         return environment_guid, is_gov, mappings
 
-    except json.JSONDecodeError as e:
-        logger.error(f"Error parsing configuration file: {e}")
-        raise MappingError(f"Failed to parse configuration file: {str(e)}")
     except Exception as e:
         logger.error(f"Unexpected error loading configuration: {e}")
-        raise MappingError(f"Failed to load configuration: {str(e)}")
-
+        raise ConfigError(f"Failed to load configuration: {str(e)}")
 
 def get_mapping(app_name: str) -> Optional[Dict[str, str]]:
     """Get mapping for a specific app name using cached configuration.
@@ -81,10 +64,9 @@ def get_mapping(app_name: str) -> Optional[Dict[str, str]]:
     try:
         _, _, mappings = load_config()
         return next((m for m in mappings if m["AppName"] == app_name), None)
-    except (ConfigError, MappingError) as e:
+    except ConfigError as e:
         logger.error(f"Error retrieving mapping for {app_name}: {e}")
         return None
-
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """Handle redirection requests.
@@ -104,7 +86,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Load configuration
         try:
             environment_guid, is_gov, _ = load_config()
-        except (ConfigError, MappingError) as e:
+        except ConfigError as e:
             logger.error(f"Configuration error: {e}")
             return func.HttpResponse(
                 "Service configuration error",
