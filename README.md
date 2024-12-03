@@ -12,6 +12,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 ## Quick Start
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/c-rw/Dynamic-Redirect.git
    cd Dynamic-Redirect
@@ -19,6 +20,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 
 2. **Configure Your Environment**
    Create a `local.settings.json` file in the root directory:
+
    ```json
    {
      "IsEncrypted": false,
@@ -52,11 +54,13 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 ### Making Requests
 
 Send a GET request to the function endpoint:
+
 ```http
 GET /api/redirector?app_name=YourAppName
 ```
 
 Additional query parameters can be passed and will be forwarded to the Power App:
+
 ```http
 GET /api/redirector?app_name=YourAppName&param1=value1&param2=value2
 ```
@@ -66,14 +70,17 @@ All query parameters (except `app_name`) will be preserved and passed through to
 ### Example Requests
 
 1. Basic redirect:
+
    ```http
    GET /api/redirector?app_name=SalesApp
    ```
 
 2. Redirect with additional parameters:
+
    ```http
    GET /api/redirector?app_name=SalesApp&user_id=12345&view=summary
    ```
+
    This will redirect to the SalesApp while preserving `user_id` and `view` parameters.
 
 ### Response Types
@@ -96,6 +103,7 @@ The function requires three environment variables:
    - `AppGUID`: The Power Apps application GUID
 
 Example APP_MAPPINGS:
+
 ```json
 [
     {
@@ -117,6 +125,7 @@ Example APP_MAPPINGS:
 ### Local Development
 
 1. Install dependencies:
+
    ```bash
    python -m pip install -r requirements.txt
    ```
@@ -124,11 +133,13 @@ Example APP_MAPPINGS:
 2. Set up local.settings.json with your configuration
 
 3. Start the function locally:
+
    ```bash
    func start
    ```
 
 4. Test using curl or Postman:
+
    ```bash
    curl "http://localhost:7071/api/redirector?app_name=YourAppName"
    ```
@@ -136,6 +147,7 @@ Example APP_MAPPINGS:
 ### Environment Variable Management
 
 For production deployments, consider using:
+
 - Azure Key Vault for sensitive configuration
 - Azure App Configuration for feature flags and app settings
 - Managed Identities for secure access to Azure resources
@@ -159,6 +171,7 @@ For support, please:
 ## Author
 
 **Chris Worth**
+
 - Website: [chrisworth.dev](https://chrisworth.dev)
 - GitHub: [@c-rw](https://github.com/c-rw)
 
