@@ -25,7 +25,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
    {
      "IsEncrypted": false,
      "Values": {
-       "AzureWebJobsStorage": "",
+       "AzureWebJobsStorage": "UseDevelopmentStorage=true",
        "FUNCTIONS_WORKER_RUNTIME": "python",
        "ENVIRONMENT_GUID": "your-environment-guid",
        "IS_GOV": "true",
@@ -56,13 +56,13 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 Send a GET request to the function endpoint:
 
 ```http
-GET /api/redirector?app_name=YourAppName
+GET /api/redirect?app_name=YourAppName
 ```
 
 Additional query parameters can be passed and will be forwarded to the Power App:
 
 ```http
-GET /api/redirector?app_name=YourAppName&param1=value1&param2=value2
+GET /api/redirect?app_name=YourAppName&param1=value1&param2=value2
 ```
 
 All query parameters (except `app_name`) will be preserved and passed through to the target Power App URL.
@@ -72,13 +72,13 @@ All query parameters (except `app_name`) will be preserved and passed through to
 1. Basic redirect:
 
    ```http
-   GET /api/redirector?app_name=SalesApp
+   GET /api/redirect?app_name=SalesApp
    ```
 
 2. Redirect with additional parameters:
 
    ```http
-   GET /api/redirector?app_name=SalesApp&user_id=12345&view=summary
+   GET /api/redirect?app_name=SalesApp&user_id=12345&view=summary
    ```
 
    This will redirect to the SalesApp while preserving `user_id` and `view` parameters.
@@ -141,7 +141,7 @@ Example APP_MAPPINGS:
 4. Test using curl or Postman:
 
    ```bash
-   curl "http://localhost:7071/api/redirector?app_name=YourAppName"
+   curl "http://localhost:7071/api/redirect?app_name=YourAppName"
    ```
 
 ### Environment Variable Management
