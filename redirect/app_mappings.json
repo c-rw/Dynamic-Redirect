@@ -1,14 +1,14 @@
 {
   "EnvironmentGUIDs": {
-    "PRD": "658afa67-29ba-49bb-812e-d83b26a47513",
-    "TST": "468678fc-cfbd-4b8b-b4a3-6e06be15b27e",
-    "DEV": "f476f187-959a-4cb2-8bca-622c652751b1"
+    "PRD": "",
+    "TST": "",
+    "DEV": ""
   },
   "Apps": {
     "aaa": {
-      "PRD": "fa8add59-6ced-4077-a08e-896078f3b693",
-      "TST": "1a4d7440-47de-42c7-9997-345fbb8a3824",
-      "DEV": "c6c9d2b8-def7-4659-9e85-5e64ff6f2d7c"
+      "PRD": "",
+      "TST": "",
+      "DEV": ""
     }
   }
 }
