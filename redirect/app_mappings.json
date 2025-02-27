@@ -1,0 +1,82 @@
+[
+  {
+    "AppName": "aaa",
+    "Environments": {
+      "PRD": "1a4d7440-47de-42c7-9997-345fbb8a3824",
+      "TST": "1a4d7440-47de-42c7-9997-345fbb8a3824",
+      "DEV": "1a4d7440-47de-42c7-9997-345fbb8a3824"
+    }
+  },
+  {
+    "AppName": "bbb",
+    "Environments": {
+      "PRD": "8b00872c-0c3e-448c-8c9c-440e401dc9d0",
+      "TST": "8b00872c-0c3e-448c-8c9c-440e401dc9d0",
+      "DEV": "8b00872c-0c3e-448c-8c9c-440e401dc9d0"
+    }
+  },
+  {
+    "AppName": "ccc",
+    "Environments": {
+      "PRD": "be87a4b2-4b83-4629-9a00-84a6b3af56a4",
+      "TST": "be87a4b2-4b83-4629-9a00-84a6b3af56a4",
+      "DEV": "be87a4b2-4b83-4629-9a00-84a6b3af56a4"
+    }
+  },
+  {
+    "AppName": "ddd",
+    "Environments": {
+      "PRD": "fa8add59-6ced-4077-a08e-896078f3b693",
+      "TST": "fa8add59-6ced-4077-a08e-896078f3b693",
+      "DEV": "fa8add59-6ced-4077-a08e-896078f3b693"
+    }
+  },
+  {
+    "AppName": "eee",
+    "Environments": {
+      "PRD": "110e1578-acff-4d6e-9e26-ce1a072eb0e2",
+      "TST": "110e1578-acff-4d6e-9e26-ce1a072eb0e2",
+      "DEV": "110e1578-acff-4d6e-9e26-ce1a072eb0e2"
+    }
+  },
+  {
+    "AppName": "fff",
+    "Environments": {
+      "PRD": "9bb73c7a-9cd8-4736-ac14-77de9dbd83f8",
+      "TST": "9bb73c7a-9cd8-4736-ac14-77de9dbd83f8",
+      "DEV": "9bb73c7a-9cd8-4736-ac14-77de9dbd83f8"
+    }
+  },
+  {
+    "AppName": "ggg",
+    "Environments": {
+      "PRD": "16ef2dd0-75bc-46b2-8420-6bac8a7ad2ec",
+      "TST": "16ef2dd0-75bc-46b2-8420-6bac8a7ad2ec",
+      "DEV": "16ef2dd0-75bc-46b2-8420-6bac8a7ad2ec"
+    }
+  },
+  {
+    "AppName": "hhh",
+    "Environments": {
+      "PRD": "405411c8-f402-420b-9dbc-1a31830d0d14",
+      "TST": "405411c8-f402-420b-9dbc-1a31830d0d14",
+      "DEV": "405411c8-f402-420b-9dbc-1a31830d0d14"
+    }
+  },
+  {
+    "AppName": "iii",
+    "Environments": {
+      "PRD": "b15ade2c-f507-4655-aec8-13cccf57f94b",
+      "TST": "b15ade2c-f507-4655-aec8-13cccf57f94b",
+      "DEV": "b15ade2c-f507-4655-aec8-13cccf57f94b"
+    }
+  },
+  {
+    "AppName": "jjj",
+    "Environments": {
+      "PRD": "c877b27a-e163-4fd8-bddc-54ecc76ecd91",
+      "TST": "c877b27a-e163-4fd8-bddc-54ecc76ecd91",
+      "DEV": "c877b27a-e163-4fd8-bddc-54ecc76ecd91"
+    }
+  }
+]

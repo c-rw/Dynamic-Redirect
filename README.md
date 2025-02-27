@@ -5,7 +5,8 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 ## Key Features
 
 - **Smart URL Routing**: Automatically directs users to the correct Power Apps application based on the `app_name` parameter
-- **Environment-based Configuration**: Uses environment variables for secure configuration management
+- **Environment Prefix Support**: Detects environment prefixes (PRD, TST, DEV) in the app name to route to specific environments
+- **Configuration File Based**: Uses a JSON file for application mappings
 - **Environment Flexibility**: Supports both commercial and government (.gov) Power Apps environments
 - **Robust Error Handling**: Provides clear, actionable feedback for common request scenarios
 
@@ -19,6 +20,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
    ```
 
 2. **Configure Your Environment**
+   
    Create a `local.settings.json` file in the root directory:
 
    ```json
@@ -28,10 +30,32 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
        "FUNCTIONS_WORKER_RUNTIME": "python",
        "ENVIRONMENT_GUID": "your-environment-guid",
-       "IS_GOV": "true",
-       "APP_MAPPINGS": "[{\"AppName\": \"YourAppName\", \"AppGUID\": \"your-app-guid\"}]"
+       "IS_GOV": "true"
      }
    }
+   ```
+
+   Then create an `app_mappings.json` file in the same directory as your `__init__.py`:
+
+   ```json
+   [
+     {
+       "AppName": "eprf",
+       "Environments": {
+         "PRD": "fa8add59-6ced-4077-a08e-896078f3b693",
+         "TST": "fa8add59-test-4077-a08e-896078f3b693",
+         "DEV": "fa8add59-dev-4077-a08e-896078f3b693"
+       }
+     },
+     {
+       "AppName": "cip",
+       "Environments": {
+         "PRD": "c877b27a-e163-4fd8-bddc-54ecc76ecd91",
+         "TST": "c877b27a-test-4fd8-bddc-54ecc76ecd91",
+         "DEV": "c877b27a-dev-4fd8-bddc-54ecc76ecd91"
+       }
+     }
+   ]
    ```
 
    > ⚠️ Important: Add local.settings.json to your .gitignore file to prevent committing sensitive information.
@@ -40,7 +64,7 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
    When deploying to Azure, configure the following application settings:
    - `ENVIRONMENT_GUID`: Your Power Apps environment identifier
    - `IS_GOV`: Set to "true" for .gov environments, "false" otherwise
-   - `APP_MAPPINGS`: JSON string containing app name to GUID mappings
+   - Ensure your `app_mappings.json` file is deployed with your function code
 
 4. **Test Locally**
    - Install [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
@@ -59,29 +83,45 @@ Send a GET request to the function endpoint:
 GET /api/redirect?app_name=YourAppName
 ```
 
+To target a specific environment (PRD, TST, DEV), add the environment prefix to the app name:
+
+```http
+GET /api/redirect?app_name=PRDYourAppName
+GET /api/redirect?app_name=TSTYourAppName
+GET /api/redirect?app_name=DEVYourAppName
+```
+
 Additional query parameters can be passed and will be forwarded to the Power App:
 
 ```http
-GET /api/redirect?app_name=YourAppName&param1=value1&param2=value2
+GET /api/redirect?app_name=TSTYourAppName&param1=value1&param2=value2
 ```
 
 All query parameters (except `app_name`) will be preserved and passed through to the target Power App URL.
 
 ### Example Requests
 
-1. Basic redirect:
+1. Basic redirect (defaults to PRD environment):
 
    ```http
-   GET /api/redirect?app_name=SalesApp
+   GET /api/redirect?app_name=cip
    ```
 
-2. Redirect with additional parameters:
+2. Environment-specific redirect:
 
    ```http
-   GET /api/redirect?app_name=SalesApp&user_id=12345&view=summary
+   GET /api/redirect?app_name=TSTcip
    ```
 
-   This will redirect to the SalesApp while preserving `user_id` and `view` parameters.
+   This will redirect to the CIP app in the TST environment.
+
+3. Redirect with additional parameters:
+
+   ```http
+   GET /api/redirect?app_name=DEVeprf&user_id=12345&view=summary
+   ```
+
+   This will redirect to the EPRF app in the DEV environment while preserving `user_id` and `view` parameters.
 
 ### Response Types
 
@@ -89,27 +129,32 @@ All query parameters (except `app_name`) will be preserved and passed through to
 |-------------|-------------|------------------|
 | 302 | Successful redirect to Power Apps | Valid app_name provided |
 | 400 | Missing app_name parameter | No app_name in query string |
-| 404 | Application not found | Invalid app_name provided |
-| 500 | Server configuration error | Missing environment variables |
+| 404 | Application not found | Invalid app_name or environment not supported |
+| 500 | Server configuration error | Missing environment variables or JSON file |
 
 ## Configuration Details
 
-The function requires three environment variables:
+The function requires two types of configuration:
 
-1. `ENVIRONMENT_GUID`: Your Power Apps environment identifier
-2. `IS_GOV`: Boolean flag for .gov domain usage ("true" or "false")
-3. `APP_MAPPINGS`: JSON string array of application mappings containing:
-   - `AppName`: The friendly name used in requests
-   - `AppGUID`: The Power Apps application GUID
+1. **Environment Variables**:
+   - `ENVIRONMENT_GUID`: Your Power Apps environment identifier
+   - `IS_GOV`: Boolean flag for .gov domain usage ("true" or "false")
 
-Example APP_MAPPINGS:
+2. **JSON Configuration File**:
+   - `app_mappings.json`: Contains mappings for applications and their environment-specific GUIDs
+
+Example app_mappings.json:
 
 ```json
 [
-    {
-        "AppName": "SalesApp",
-        "AppGUID": "87654321-4321-4321-4321-210987654321"
+  {
+    "AppName": "SalesApp",
+    "Environments": {
+      "PRD": "12345678-abcd-1234-efgh-1234567890ab",
+      "TST": "87654321-abcd-4321-efgh-0987654321zy",
+      "DEV": "abcdef12-3456-7890-abcd-ef1234567890"
     }
+  }
 ]
 ```
 
@@ -130,7 +175,7 @@ Example APP_MAPPINGS:
    python -m pip install -r requirements.txt
    ```
 
-2. Set up local.settings.json with your configuration
+2. Set up local.settings.json and app_mappings.json with your configuration
 
 3. Start the function locally:
 
@@ -141,7 +186,7 @@ Example APP_MAPPINGS:
 4. Test using curl or Postman:
 
    ```bash
-   curl "http://localhost:7071/api/redirect?app_name=YourAppName"
+   curl "http://localhost:7071/api/redirect?app_name=TSTYourAppName"
    ```
 
 ### Environment Variable Management
