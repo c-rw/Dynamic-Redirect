@@ -5,8 +5,8 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 ## Key Features
 
 - **Smart URL Routing**: Automatically directs users to the correct Power Apps application based on the `app_name` parameter
-- **Environment Prefix Support**: Detects environment prefixes (PRD, TST, DEV) in the app name to route to specific environments
-- **Configuration File Based**: Uses a JSON file for application mappings
+- **Environment Prefix Support**: Detects environment prefixes (PRD, TST, DEV) in the app name to route to different Power Apps environments
+- **Configuration File Based**: Uses a JSON file for environment and application mappings
 - **Environment Flexibility**: Supports both commercial and government (.gov) Power Apps environments
 - **Robust Error Handling**: Provides clear, actionable feedback for common request scenarios
 
@@ -29,7 +29,6 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
      "Values": {
        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
        "FUNCTIONS_WORKER_RUNTIME": "python",
-       "ENVIRONMENT_GUID": "your-environment-guid",
        "IS_GOV": "true"
      }
    }
@@ -38,31 +37,31 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
    Then create an `app_mappings.json` file in the same directory as your `__init__.py`:
 
    ```json
-   [
-     {
-       "AppName": "eprf",
-       "Environments": {
+   {
+     "EnvironmentGUIDs": {
+       "PRD": "your-prd-environment-guid",
+       "TST": "your-tst-environment-guid",
+       "DEV": "your-dev-environment-guid"
+     },
+     "Apps": {
+       "eprf": {
          "PRD": "fa8add59-6ced-4077-a08e-896078f3b693",
          "TST": "fa8add59-test-4077-a08e-896078f3b693",
          "DEV": "fa8add59-dev-4077-a08e-896078f3b693"
-       }
-     },
-     {
-       "AppName": "cip",
-       "Environments": {
+       },
+       "cip": {
          "PRD": "c877b27a-e163-4fd8-bddc-54ecc76ecd91",
          "TST": "c877b27a-test-4fd8-bddc-54ecc76ecd91",
          "DEV": "c877b27a-dev-4fd8-bddc-54ecc76ecd91"
        }
      }
-   ]
+   }
    ```
 
    > ⚠️ Important: Add local.settings.json to your .gitignore file to prevent committing sensitive information.
 
 3. **Configure Azure Function App Settings**
    When deploying to Azure, configure the following application settings:
-   - `ENVIRONMENT_GUID`: Your Power Apps environment identifier
    - `IS_GOV`: Set to "true" for .gov environments, "false" otherwise
    - Ensure your `app_mappings.json` file is deployed with your function code
 
@@ -137,25 +136,33 @@ All query parameters (except `app_name`) will be preserved and passed through to
 The function requires two types of configuration:
 
 1. **Environment Variables**:
-   - `ENVIRONMENT_GUID`: Your Power Apps environment identifier
    - `IS_GOV`: Boolean flag for .gov domain usage ("true" or "false")
 
 2. **JSON Configuration File**:
-   - `app_mappings.json`: Contains mappings for applications and their environment-specific GUIDs
+   - `app_mappings.json`: Contains environment GUIDs and app mappings
 
 Example app_mappings.json:
 
 ```json
-[
-  {
-    "AppName": "SalesApp",
-    "Environments": {
+{
+  "EnvironmentGUIDs": {
+    "PRD": "prod-environment-guid-here",
+    "TST": "test-environment-guid-here",
+    "DEV": "dev-environment-guid-here"
+  },
+  "Apps": {
+    "SalesApp": {
       "PRD": "12345678-abcd-1234-efgh-1234567890ab",
-      "TST": "87654321-abcd-4321-efgh-0987654321zy",
-      "DEV": "abcdef12-3456-7890-abcd-ef1234567890"
+      "TST": "test-12345678-abcd-1234-efgh-1234567890ab",
+      "DEV": "dev-12345678-abcd-1234-efgh-1234567890ab"
+    },
+    "HRApp": {
+      "PRD": "87654321-abcd-4321-efgh-0987654321zy",
+      "TST": "test-87654321-abcd-4321-efgh-0987654321zy",
+      "DEV": "dev-87654321-abcd-4321-efgh-0987654321zy"
     }
   }
-]
+}
 ```
 
 ## Development
