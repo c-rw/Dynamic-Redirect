@@ -8,6 +8,8 @@ A lightweight Azure Function that intelligently routes users to Power Apps appli
 - **Environment Prefix Support**: Detects environment prefixes (PRD, TST, DEV) in the app name to route to different Power Apps environments
 - **Configuration File Based**: Uses a JSON file for environment and application mappings
 - **Environment Flexibility**: Supports both commercial and government (.gov) Power Apps environments
+- **Performance Optimization**: Implements LRU caching for configuration to minimize overhead
+- **Detailed Logging**: Includes request IDs, timing metrics, and comprehensive error information
 - **Robust Error Handling**: Provides clear, actionable feedback for common request scenarios
 
 ## Quick Start
@@ -129,7 +131,7 @@ All query parameters (except `app_name`) will be preserved and passed through to
 | 302 | Successful redirect to Power Apps | Valid app_name provided |
 | 400 | Missing app_name parameter | No app_name in query string |
 | 404 | Application not found | Invalid app_name or environment not supported |
-| 500 | Server configuration error | Missing environment variables or JSON file |
+| 500 | Server configuration error | Missing environment variables, JSON file, or unexpected exceptions |
 
 ## Configuration Details
 
@@ -164,6 +166,33 @@ Example app_mappings.json:
   }
 }
 ```
+
+### Configuration Validation
+
+The function performs several validation checks on the configuration:
+
+- Verifies the existence of required keys (`EnvironmentGUIDs` and `Apps`)
+- Validates environment settings against supported environments (`PRD`, `TST`, `DEV`)
+- Logs warnings for missing environments in the configuration
+- Provides detailed error messages for configuration issues
+
+### Performance Optimization
+
+The function uses Python's `@lru_cache` decorator to cache the configuration loading, which:
+- Prevents repeated file I/O operations
+- Improves response times for subsequent requests
+- Reduces resource consumption
+
+## Logging and Monitoring
+
+The function implements comprehensive logging:
+
+- **Request Tracking**: Each request receives a unique ID for tracing
+- **Timing Metrics**: Request duration is logged for performance monitoring
+- **Detailed Error Information**: All exceptions include contextual information
+- **Environment Resolution**: Logs which environment and app is being accessed
+
+This logging approach facilitates troubleshooting and monitoring in production environments.
 
 ## Development
 
